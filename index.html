@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Decision tree generator</title>
+    <meta charset="utf-8" content="text/html">
+    <link href="https://unpkg.com/tabulator-tables@4.9.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+    <style>
+        .classColumn {
+            font-weight: bold;
+        }
+        #final-tree {
+            border: 1px solid lightgray;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center">Decision tree generator</h1>
+
+    <h2>Parameters</h2>
+    <div>
+        <button id="columns-addrow">Add new column</button>
+        <button id="columns-delrow">Remove selected columns</button>
+    </div>
+    <div id="columns-table"></div>
+
+
+    <h2>Input data</h2>
+    <div>
+        <button id="table-addrow">Add new row</button>
+        <button id="table-delrow">Remove selected rows</button>
+        <button id="table-clear">Clear table</button>
+        <button id="table-download">Download CSV</button>
+    </div>
+    <div id="input-table"></div>
+
+    <h2>Output data</h2>
+    <button onclick="draw_tree()">Redraw tree</button>
+    <div id="final-tree" style="height: 500px;margin: 1.5em;padding: 2em;"></div>
+</body>
+</html>
