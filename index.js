@@ -297,6 +297,10 @@ function update_inputtable_columns() {
         }, (typeof row[1] == 'boolean') ? boolean_column : string_column)
     }).slice(1);
     // @ts-ignore
+    columns_def.unshift({formatter:"rowSelection", titleFormatter:"rowSelection", headerHozAlign: "center", hozAlign:"center", headerSort:false, width:30, cellClick:function(_e, cell){
+        cell.getRow().toggleSelect();
+    }})
+    // @ts-ignore
     columns_def.unshift({rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:30, minWidth:30});
 
     inputtable?.setColumns(columns_def)
@@ -327,9 +331,9 @@ function init_columnstable() {
         selectable: true,
         layout:"fitDataTable",
         columns: [
-            {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", headerSort:false, cellClick:function(_e, cell){
+            {formatter:"rowSelection", titleFormatter:"rowSelection", headerHozAlign: "center", hozAlign:"center", headerSort:false, width:30, cellClick:function(_e, cell){
                 cell.getRow().toggleSelect();
-              }},
+            }},
             {title:"ID", field:"name", editor:"input", minWidth: 70},
             {title:"Display name", field:"tag", editor:"input"},
             {title:"Type", field:"type", minWidth:90, editor:"select", editorParams:{values:["boolean", "string"]}},
@@ -382,11 +386,12 @@ function init_columnstable() {
  */
 function update_columnstable() {
     const new_names = Array.from(columns_table_data, column => column.name);
+    new_names.push('id');
     const attributes = Array.from(Object.keys(inputdata[0]))
 
     if (attributes.length !== new_names.length) {
         const deleted_rows = attributes.filter(attr => !new_names.includes(attr));
-        console.debug("deleted rows", deleted_rows);
+        console.debug("deleted rows", deleted_rows, attributes, new_names);
         inputdata.forEach(row => {
             deleted_rows.forEach(attr => {
                 delete row[attr];
@@ -427,28 +432,27 @@ window.addEventListener('load', () => {
 
     // add a rown to the table when asked to
     document.getElementById('table-addrow').addEventListener('click', () => {
-        if (inputdata.length == 0) {
-            alert("Table must not be empty!");
-            return;
-        }
-        // get a copy of the last row
-        let elem = {... inputdata[inputdata.length-1]}; // copy object
         // increment the ID by one
-        elem.id = elem.id+1;
+        let id = Math.max(...Array.from(inputdata, r => r.id)) + 1;
+        if (id == -Infinity) id = 0;
+        let new_elem = {id: id};
         // reset each case according to its type
-        Object.keys(elem).forEach(key => {
-            if (key != 'id') {
-                switch (typeof elem[key]) {
-                    case 'string': elem[key] = '';
-                    case 'boolean': elem[key] = false;
-                    case 'number': elem[key] = 0;
-                    default: elem[key] = null;
-                }
-                elem[key] = false
+        columns_table_data.forEach(column => {
+            switch (column.type) {
+                case 'string':
+                    new_elem[column.name] = '';
+                    break;
+                case 'boolean':
+                    new_elem[column.name] = false;
+                    break;
+                default:
+                    new_elem[column.name] = null;
+                    console.debug("NOPE");
             }
         })
         // add it to the table
-        inputdata.push(elem);
+        // @ts-ignore
+        inputdata.push(new_elem);
     })
 
     // delete every selected row
@@ -503,7 +507,7 @@ window.addEventListener('load', () => {
         autoResize: true,
         height: '100%',
         width: '100%',
-        interaction: {hover: true, zoomView: false},
+        interaction: {hover: true, zoomView: true},
         layout: {hierarchical: true}
     };
 
