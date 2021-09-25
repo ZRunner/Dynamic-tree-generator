@@ -14,13 +14,22 @@
         #final-tree {
             border: 1px solid lightgray;
         }
+        .btns-control {
+            padding: .6em .2em;
+        }
+        footer {
+            font-size: small;
+        }
+        footer a {
+            padding: 0 .2em;
+        }
     </style>
 </head>
 <body>
     <h1 style="text-align: center">Decision tree generator</h1>
 
     <h2>Parameters</h2>
-    <div>
+    <div class="btns-control">
         <button id="columns-addrow">Add new column</button>
         <button id="columns-delrow">Remove selected columns</button>
     </div>
@@ -28,7 +37,7 @@
 
 
     <h2>Input data</h2>
-    <div>
+    <div class="btns-control">
         <button id="table-addrow">Add new row</button>
         <button id="table-delrow">Remove selected rows</button>
         <button id="table-clear">Clear table</button>
@@ -39,5 +48,7 @@
     <h2>Output data</h2>
     <button onclick="draw_tree()">Redraw tree</button>
     <div id="final-tree" style="height: 500px;margin: 1.5em;padding: 2em;"></div>
+
+    <footer><a href="https://github.com/ZRunner/Dynamic-tree-generator">See on GitHub</a> <a href="https://www.paypal.com/paypalme/my/profile">Make a donation</a></footer>
 </body>
 </html>
