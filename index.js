@@ -20,6 +20,7 @@ const column_names = {
 }
 const columns_table_data = []
 var inputtable;
+var columnstable;
 
 const boolean_column = { formatter: "tickCross", editor: "tickCross", hozAlign: "center", headerHozAlign: "center", editable: true }
 const string_column = { hozAlign: "center", headerHozAlign: "center", editor:"input", editable: true }
@@ -284,6 +285,9 @@ function delete_row(row) {
     inputdata.splice(i, 1);
 }
 
+/**
+ * Update the columns used by the data table
+ */
 function update_inputtable_columns() {
     // create the table columns definitions
     let columns_def = Array.from(Object.entries(inputdata[0]), row => {
@@ -298,6 +302,9 @@ function update_inputtable_columns() {
     inputtable?.setColumns(columns_def)
 }
 
+/**
+ * Init the columns definitions table
+ */
 function init_columnstable() {
     while (columns_table_data.length) { columns_table_data.pop() };
     
@@ -313,23 +320,28 @@ function init_columnstable() {
     })
     
     // @ts-ignore
-    new Tabulator("#columns-table", {
+    columnstable = new Tabulator("#columns-table", {
         data: columns_table_data,
         reactiveData: true,
         maxHeight: 160,
         selectable: true,
         layout:"fitDataTable",
         columns: [
+            {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", headerSort:false, cellClick:function(_e, cell){
+                cell.getRow().toggleSelect();
+              }},
             {title:"ID", field:"name", editor:"input", minWidth: 70},
             {title:"Display name", field:"tag", editor:"input"},
             {title:"Type", field:"type", minWidth:90, editor:"select", editorParams:{values:["boolean", "string"]}},
         ],
         dataChanged: () => {
+            console.debug("DATA CHANGED");
             const new_names = Array.from(columns_table_data, column => column.name);
+            const attributes = Array.from(Object.keys(inputdata[0]))
+            
             columns_table_data.forEach(column => {
                 column_names[column.name] = column.tag;
 
-                const attributes = Array.from(Object.keys(inputdata[0]))
                 if (!attributes.includes(column.name)) {
                     // a column ID changed
                     const old_name = attributes.find(name => name != 'id' && !new_names.includes(name))
@@ -341,6 +353,7 @@ function init_columnstable() {
                         row[column.name] = row[old_name];
                         delete row[old_name]
                     })
+                    console.debug("old_name:", old_name, "new_name:", column.name)
                 }
 
                 if (typeof inputdata[0][column.name] != column.type) {
@@ -350,13 +363,67 @@ function init_columnstable() {
                     })
                 }
             })
+
+            // check for any duplicated "names" (or data IDs)
+            if (new_names.length !== new Set(new_names).size) {
+                alert("You have duplicated column names! Make sure to fix it before editing data")
+            }
+            // check for any deleted column
+            update_columnstable();
+
             update_inputtable_columns();
         },
     })
 }
 
+/**
+ * 
+ * @returns {boolean} if a column has indeed been deleted
+ */
+function update_columnstable() {
+    const new_names = Array.from(columns_table_data, column => column.name);
+    const attributes = Array.from(Object.keys(inputdata[0]))
+
+    if (attributes.length !== new_names.length) {
+        const deleted_rows = attributes.filter(attr => !new_names.includes(attr));
+        console.debug("deleted rows", deleted_rows);
+        inputdata.forEach(row => {
+            deleted_rows.forEach(attr => {
+                delete row[attr];
+            });
+        });
+        return true;
+    }
+    return false;
+}
 
 window.addEventListener('load', () => {
+
+    // add a column definition row
+    document.getElementById('columns-addrow').addEventListener('click', () => {
+        columns_table_data.push({
+            id: columns_table_data[columns_table_data.length-1].id+1,
+            name: "",
+            tag: "New column",
+            type: "string",
+        })
+    })
+
+    // delete a column definition row
+    document.getElementById('columns-delrow').addEventListener('click', () => {
+        columnstable.getSelectedRows().forEach(row => {
+            const i = columns_table_data.findIndex(column => column.id === row._row.data.id);
+            if (i == -1) {
+                // if row exists in the table but not in inputdata
+                row.delete();
+                return;
+            };
+            columns_table_data.splice(i, 1);
+        })
+        if (update_columnstable()) {
+            update_inputtable_columns();
+        } 
+    })
 
     // add a rown to the table when asked to
     document.getElementById('table-addrow').addEventListener('click', () => {
@@ -447,3 +514,4 @@ window.addEventListener('load', () => {
     // calculate and draw the tree
     draw_tree();
 });
+
