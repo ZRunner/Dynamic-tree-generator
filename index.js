@@ -297,11 +297,11 @@ function update_inputtable_columns() {
         }, (typeof row[1] == 'boolean') ? boolean_column : string_column)
     }).slice(1);
     // @ts-ignore
-    columns_def.unshift({formatter:"rowSelection", titleFormatter:"rowSelection", headerHozAlign: "center", hozAlign:"center", headerSort:false, width:30, cellClick:function(_e, cell){
+    columns_def.unshift({formatter:"rowSelection", titleFormatter:"rowSelection", headerHozAlign: "center", hozAlign:"center", headerSort:false, width:30, download:false, cellClick:function(_e, cell){
         cell.getRow().toggleSelect();
     }})
     // @ts-ignore
-    columns_def.unshift({rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:30, minWidth:30});
+    columns_def.unshift({rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:30, minWidth:30, download:false});
 
     inputtable?.setColumns(columns_def)
 }
@@ -331,7 +331,7 @@ function init_columnstable() {
         selectable: true,
         layout:"fitDataTable",
         columns: [
-            {formatter:"rowSelection", titleFormatter:"rowSelection", headerHozAlign: "center", hozAlign:"center", headerSort:false, width:30, cellClick:function(_e, cell){
+            {formatter:"rowSelection", titleFormatter:"rowSelection", headerHozAlign: "center", hozAlign:"center", headerSort:false, width:30, download:false, cellClick:function(_e, cell){
                 cell.getRow().toggleSelect();
             }},
             {title:"ID", field:"name", editor:"input", minWidth: 70},
@@ -471,7 +471,7 @@ window.addEventListener('load', () => {
 
     // download the table data as a CSV file
     document.getElementById("table-download").addEventListener("click", () => {
-        inputtable.download("csv", "data.csv");
+        inputtable.download("json", "data.json");
     });
 
     
